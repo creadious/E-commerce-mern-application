@@ -23,7 +23,6 @@ const userSchema = new Schema(
     },
     avatar: {
       type: String, //Image Hosting link
-      required: true,
     },
   },
   { timestamps: true }

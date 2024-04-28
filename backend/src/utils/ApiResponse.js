@@ -1,4 +1,4 @@
-import { allStatusCode } from "../constants";
+import { allStatusCode } from "../constants.js";
 
 class APIResponse {
   constructor(statusCode, data = [], message = "Successfully work") {
