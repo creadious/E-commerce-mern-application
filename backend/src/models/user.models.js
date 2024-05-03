@@ -21,8 +21,21 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
+    gender: {
+      type: String,
+      required: true,
+      enum: ["male", "female", "other"],
+    },
+    dateOfBirth: {
+      type: Date,
+      // required: true,
+    },
     avatar: {
       type: String, //Image Hosting link
+    },
+    role: {
+      type: String,
+      default: "user",
     },
   },
   { timestamps: true }

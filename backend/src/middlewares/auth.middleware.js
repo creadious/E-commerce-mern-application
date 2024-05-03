@@ -20,8 +20,7 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
 
     const user = await User.find({ email: decodedToken?.email });
 
-
-    if (!user) {
+    if (!user || (typeof user === 'object' && Object.keys(user).length === 0)) {
       // TODO discuss about frontend
       return res
         .status(allStatusCode.unauthorized)
@@ -29,6 +28,7 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
           new ApiError(allStatusCode.unauthorized, "Invalid access token.")
         );
     }
+    
 
     req.user = user[0];
     next();

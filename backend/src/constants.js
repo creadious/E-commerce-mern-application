@@ -5,5 +5,6 @@ export const allStatusCode = {
   success:200,
   userExist:409,
   somethingWrong:500,
-  unauthorized:401
+  unauthorized:401,
+  notFound:410
 };

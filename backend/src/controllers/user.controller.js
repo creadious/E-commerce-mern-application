@@ -4,11 +4,16 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { APIResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { firstName, lastName, email } = req.body;
+  const { firstName, lastName, email, gender } = req.body;
 
-  if ([firstName, lastName, email].some((field) => field?.trim() === "")) {
+  if (
+    [firstName, lastName, email, gender].some(
+      (field) => field === undefined || field.trim() === ""
+    )
+  ) {
     return res
       .status(allStatusCode.clientError)
       .json(
@@ -16,6 +21,16 @@ const registerUser = asyncHandler(async (req, res) => {
           allStatusCode.clientError,
           "Please fill the required fields"
         )
+      );
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    return res
+      .status(allStatusCode.clientError)
+      .json(
+        new ApiError(allStatusCode.clientError, "Please enter proper email.")
       );
   }
 
@@ -32,6 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
     firstName,
     lastName,
     email: email?.toLowerCase(),
+    gender,
   });
 
   const createdUser = await User.findById(user?._id);
@@ -76,7 +92,7 @@ const sendAccessToken = asyncHandler(async (req, res) => {
   }
 
   const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "1h",
+    expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
   });
 
   const options = {
@@ -103,9 +119,13 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateUserDetails = asyncHandler(async (req, res) => {
-  const { firstName, lastName, email } = req.body;
+  const { firstName, lastName } = req.body;
 
-  if ([firstName, lastName, email].some((field) => field?.trim() === "")) {
+  if (
+    [firstName, lastName].some(
+      (field) => field === undefined || field.trim() === ""
+    )
+  ) {
     return res
       .status(allStatusCode.clientError)
       .json(
@@ -125,7 +145,6 @@ const updateUserDetails = asyncHandler(async (req, res) => {
         $set: {
           firstName,
           lastName,
-          email: email.toLowerCase(),
         },
       },
       { new: true }
@@ -142,8 +161,118 @@ const updateUserDetails = asyncHandler(async (req, res) => {
       );
   } catch (error) {
     console.error("Error updating user details:", error);
-    return res.status(allStatusCode.somethingWrong).json(new ApiError(allStatusCode.somethingWrong, "Internal Server Error"));
+    return res
+      .status(allStatusCode.somethingWrong)
+      .json(
+        new ApiError(allStatusCode.somethingWrong, "Internal Server Error")
+      );
   }
 });
 
-export { registerUser, sendAccessToken, getCurrentUser, updateUserDetails };
+const updateEmail = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res
+      .status(allStatusCode.clientError)
+      .json(new ApiError(allStatusCode.clientError, "Please enter the email."));
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    return res
+      .status(allStatusCode.clientError)
+      .json(
+        new ApiError(allStatusCode.clientError, "Please enter proper email.")
+      );
+  }
+
+  const user = req?.user;
+
+  if (email === user?.email) {
+    return res
+      .status(allStatusCode.clientError)
+      .json(
+        new ApiError(allStatusCode.clientError, "This is your previous email.")
+      );
+  }
+
+  const checkEmail = await User.findOne({ email });
+
+  if(checkEmail){
+    return res
+    .status(allStatusCode.clientError)
+    .json(
+      new ApiError(allStatusCode.clientError, "This email already have an account.")
+    );
+  }
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      user?._id,
+      {
+        $set: {
+          email: email.toLowerCase(),
+        },
+      },
+      { new: true }
+    );
+
+    return res
+      .status(allStatusCode.success)
+      .json(
+        new APIResponse(
+          allStatusCode.success,
+          updatedUser,
+          "Email updated successfully."
+        )
+      );
+  } catch (error) {
+    console.error("Error updating email in database:", error);
+    return res
+      .status(allStatusCode.somethingWrong)
+      .json(
+        new ApiError(allStatusCode.somethingWrong, "Internal Server Error")
+      );
+  }
+});
+
+const updateAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file?.path;
+  if (!avatarLocalPath) {
+    return res.status(400).json(new ApiError(400, "Avatar file is missing"));
+  }
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  if (!avatar?.url) {
+    return res
+      .status(400)
+      .json(new ApiError(400, "Error while uploading on avatar"));
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        avatar: avatar?.url,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, user, "Avatar update successfully."));
+});
+
+export {
+  registerUser,
+  sendAccessToken,
+  getCurrentUser,
+  updateUserDetails,
+  updateEmail,
+  updateAvatar,
+};
