@@ -15,10 +15,6 @@
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.5/firebase-auth.js"></script>
-
     <title>Register - ECOM</title>
   </head>
   <body>
@@ -142,6 +138,7 @@
                       name="password"
                       id="password"
                       placeholder="••••••••"
+                      autocomplete="false"
                       class="bg-gray-50 border border-gray-300 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                       required
                     />
@@ -191,20 +188,11 @@
       </div>
     </section>
 
-    <!-- <script src="./firebase.config.js"></script> -->
+    <script src="./main.js"></script>
 
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyCRzOOCox3F_r4wwGr0SsXQX6-V1gT2mFE",
-        authDomain: "creadious-ecom.firebaseapp.com",
-        projectId: "creadious-ecom",
-        storageBucket: "creadious-ecom.appspot.com",
-        messagingSenderId: "536373749688",
-        appId: "1:536373749688:web:1d997e739a848868d3d14d",
-      };
-
-      firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
+    <script type="module">
+      import { auth } from "./firebase.config.js";
+      import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
       document
         .getElementById("registrationForm")
@@ -227,40 +215,48 @@
           }
           passwordError.classList.add("hidden");
 
-          console.log({ firstName, lastName, email, gender, password });
+          const userDetails = { firstName, lastName, email, gender, password };
 
-          auth
-            .createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-              // Signed in
-              const user = userCredential.user;
-              console.log("User registered:", user);
-              alert("Registration successful!");
-              // Redirect to another page or perform other actions
+          fetch("http://localhost:8000/api/v1/users/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userDetails),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              if (data?.success) {
+                userRegister(email, password)
+                  .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("User registered:", user);
+                    alert("Registration successful!");
+                    window.location.href = "/";
+                  })
+                  .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    const emailExist = searchWord(
+                      errorMessage,
+                      "email-already-in-use"
+                    );
+                    if (emailExist) {
+                      return alert("Email already exist.");
+                    }
+                    console.error("Registration error:", errorMessage);
+                    alert("Registration failed. " + errorMessage);
+                  });
+              } else {
+                console.log(data?.message);
+                alert("Registration failed. " + data?.message);
+              }
             })
             .catch((error) => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
-              console.error("Registration error:", errorMessage);
-              alert("Registration failed. " + errorMessage);
+              console.error("Error:", error);
+              alert("Registration failed. Please try again.");
             });
-
-          // fetch("http://localhost:8000/users/register", {
-          //   method: "POST",
-          //   body: formData,
-          // })
-          //   .then((response) => response.json())
-          //   .then((data) => {
-          //     // Handle successful registration
-          //     console.log(data);
-          //     alert("Registration successful!");
-          //     // Redirect to login page or any other action
-          //   })
-          //   .catch((error) => {
-          //     // Handle error
-          //     console.error("Error:", error);
-          //     alert("Registration failed. Please try again.");
-          //   });
         });
 
       const radioButtons = document.querySelectorAll('input[type="radio"]');

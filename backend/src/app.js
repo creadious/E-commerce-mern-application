@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { FILE_SIZE_LIMIT } from "./constants.js";
-// import multer from "multer";
+import multer from "multer";
 
-// const upload = multer();
+const upload = multer();
 const app = express();
 
 app.use(
@@ -18,7 +18,7 @@ app.use(express.json({ limit: FILE_SIZE_LIMIT }));
 app.use(express.urlencoded({ extended: true, limit: FILE_SIZE_LIMIT }));
 app.use(express.static("public"));
 app.use(cookieParser());
-// app.use(upload.any());
+// app.use(upload.array());
 
 // app.post("/check", async (req, res) => {
 //   try {
@@ -26,7 +26,7 @@ app.use(cookieParser());
 
 //     console.log({ name });
 
-//     if (name === undefined || name === "") {
+//     if (name == undefined || name == "") {
 //       return res.send("Data not received :(");
 //     }
 

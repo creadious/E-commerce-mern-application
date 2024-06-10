@@ -75,7 +75,7 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const sendAccessToken = asyncHandler(async (req, res) => {
-  const { email } = req.query;
+  const { email } = req.body;
 
   if (!email) {
     return res
@@ -103,7 +103,13 @@ const sendAccessToken = asyncHandler(async (req, res) => {
   return res
     .status(allStatusCode.success)
     .cookie("accessToken", token, options)
-    .json(new APIResponse(allStatusCode.success, { token }));
+    .json(
+      new APIResponse(
+        allStatusCode.success,
+        { token },
+        "JWT token send successfully"
+      )
+    );
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
@@ -200,12 +206,15 @@ const updateEmail = asyncHandler(async (req, res) => {
 
   const checkEmail = await User.findOne({ email });
 
-  if(checkEmail){
+  if (checkEmail) {
     return res
-    .status(allStatusCode.clientError)
-    .json(
-      new ApiError(allStatusCode.clientError, "This email already have an account.")
-    );
+      .status(allStatusCode.clientError)
+      .json(
+        new ApiError(
+          allStatusCode.clientError,
+          "This email already have an account."
+        )
+      );
   }
 
   try {
