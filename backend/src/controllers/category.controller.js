@@ -1,5 +1,4 @@
 import { allStatusCode } from "../constants.js";
-
 import { Category } from "../models/category.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -7,10 +6,9 @@ import { APIResponse } from "../utils/ApiResponse.js";
 
 const addCategory = asyncHandler(async (req, res) => {
   const user = req?.user;
-
   const { category } = req?.body;
 
-  if (category == undefined || category == "") {
+  if (!category) {
     return res
       .status(allStatusCode.clientError)
       .json(new ApiError(allStatusCode.clientError, "Please add category."));
@@ -21,9 +19,7 @@ const addCategory = asyncHandler(async (req, res) => {
   if (categoryCheck) {
     return res
       .status(allStatusCode.clientError)
-      .json(
-        new ApiError(allStatusCode.clientError, "This category already exist.")
-      );
+      .json(new ApiError(allStatusCode.clientError, "This category already exist."));
   }
 
   const addCategory = await Category.create({
@@ -36,12 +32,7 @@ const addCategory = asyncHandler(async (req, res) => {
   if (!Cat) {
     return res
       .status(allStatusCode.somethingWrong)
-      .json(
-        new ApiError(
-          allStatusCode.somethingWrong,
-          "Somethings went wrong! while add category."
-        )
-      );
+      .json(new ApiError(allStatusCode.somethingWrong, "Somethings went wrong! while add category."));
   }
 
   return res
@@ -49,16 +40,44 @@ const addCategory = asyncHandler(async (req, res) => {
     .json(new APIResponse(allStatusCode.success, Cat, "Category added!"));
 });
 
+const addSubcategory = asyncHandler(async (req, res) => {
+  const user = req?.user;
+  const { categoryId, subcategory } = req?.body;
+
+  if (!categoryId || !subcategory) {
+    return res
+      .status(allStatusCode.clientError)
+      .json(new ApiError(allStatusCode.clientError, "Category ID and subcategory name are required."));
+  }
+
+  const category = await Category.findById(categoryId);
+
+  if (!category) {
+    return res
+      .status(allStatusCode.notFound)
+      .json(new ApiError(allStatusCode.notFound, "Category not found."));
+  }
+
+  const subcategoryCheck = category.subcategories.find(sub => sub.name === subcategory);
+
+  if (subcategoryCheck) {
+    return res
+      .status(allStatusCode.clientError)
+      .json(new ApiError(allStatusCode.clientError, "This subcategory already exist."));
+  }
+
+  category.subcategories.push({ name: subcategory, addedBy: user?.firstName + " " + user?.lastName });
+  await category.save();
+
+  return res
+    .status(allStatusCode.success)
+    .json(new APIResponse(allStatusCode.success, category, "Subcategory added!"));
+});
+
 const viewAllCategories = asyncHandler(async (req, res) => {
   const allCategories = await Category.find();
 
-  // Extract id and name properties from each category
-  const categoriesData = allCategories.map((category) => ({
-    id: category._id,
-    name: category.name,
-  }));
-
-  if (categoriesData.length == 0) {
+  if (!allCategories.length) {
     return res
       .status(allStatusCode.clientError)
       .json(new ApiError(allStatusCode.notFound, "No category exists."));
@@ -66,121 +85,87 @@ const viewAllCategories = asyncHandler(async (req, res) => {
 
   return res
     .status(allStatusCode.success)
-    .json(
-      new APIResponse(
-        allStatusCode.success,
-        categoriesData,
-        "All categories fetch successfully!"
-      )
-    );
+    .json(new APIResponse(allStatusCode.success, allCategories, "All categories fetched successfully!"));
 });
 
 const deleteCategory = asyncHandler(async (req, res) => {
   const { id } = req.query;
 
-  try {
-    // Validate if the id parameter is provided
-    if (!id) {
-      return res
-        .status(allStatusCode.clientError)
-        .json(
-          new ApiError(allStatusCode.clientError, "Category ID is required.")
-        );
-    }
-
-    // Delete the category by its ID
-    const deletedCategory = await Category.findByIdAndDelete(id);
-
-    // Check if the category was found and deleted
-    if (!deletedCategory) {
-      return res
-        .status(allStatusCode.somethingWrong)
-        .json(
-          new ApiError(allStatusCode.somethingWrong, "Category not found.")
-        );
-    }
-
+  if (!id) {
     return res
-      .status(allStatusCode.success)
-      .json(
-        new APIResponse(
-          allStatusCode.success,
-          null,
-          "Category deleted successfully."
-        )
-      );
-  } catch (error) {
-    console.error("Error deleting category:", error);
-    return res
-      .status(allStatusCode.serverError)
-      .json(
-        new ApiError(
-          allStatusCode.serverError,
-          "An error occurred while deleting the category."
-        )
-      );
+      .status(allStatusCode.clientError)
+      .json(new ApiError(allStatusCode.clientError, "Category ID is required."));
   }
+
+  const deletedCategory = await Category.findByIdAndDelete(id);
+
+  if (!deletedCategory) {
+    return res
+      .status(allStatusCode.somethingWrong)
+      .json(new ApiError(allStatusCode.somethingWrong, "Category not found."));
+  }
+
+  return res
+    .status(allStatusCode.success)
+    .json(new APIResponse(allStatusCode.success, null, "Category deleted successfully."));
+});
+
+const deleteSubcategory = asyncHandler(async (req, res) => {
+  const { categoryId, subcategoryId } = req.query;
+
+  if (!categoryId || !subcategoryId) {
+    return res
+      .status(allStatusCode.clientError)
+      .json(new ApiError(allStatusCode.clientError, "Category ID and subcategory ID are required."));
+  }
+
+  const category = await Category.findById(categoryId);
+
+  if (!category) {
+    return res
+      .status(allStatusCode.notFound)
+      .json(new ApiError(allStatusCode.notFound, "Category not found."));
+  }
+
+  category.subcategories = category.subcategories.filter(sub => sub._id.toString() !== subcategoryId);
+  await category.save();
+
+  return res
+    .status(allStatusCode.success)
+    .json(new APIResponse(allStatusCode.success, category, "Subcategory deleted successfully."));
 });
 
 const updateCategory = asyncHandler(async (req, res) => {
   const { id } = req.query;
   const { name } = req.body;
 
-  try {
-    // Validate if the id parameter is provided
-    if (!id) {
-      return res
-        .status(allStatusCode.clientError)
-        .json(
-          new ApiError(allStatusCode.clientError, "Category ID is required.")
-        );
-    }
-
-    // Validate if the name field is provided
-    if (!name) {
-      return res
-        .status(allStatusCode.clientError)
-        .json(
-          new ApiError(allStatusCode.clientError, "Category name is required.")
-        );
-    }
-
-    // Update the category by its ID
-    const updatedCategory = await Category.findByIdAndUpdate(
-      id,
-      { name }, // Update the name field
-      { new: true } // Return the updated category after update
-    );
-
-    // Check if the category was found and updated
-    if (!updatedCategory) {
-      return res
-        .status(allStatusCode.somethingWrong)
-        .json(
-          new ApiError(allStatusCode.somethingWrong, "Category not found.")
-        );
-    }
-
+  if (!id) {
     return res
-      .status(allStatusCode.success)
-      .json(
-        new APIResponse(
-          allStatusCode.success,
-          updatedCategory,
-          "Category updated successfully."
-        )
-      );
-  } catch (error) {
-    console.error("Error updating category:", error);
-    return res
-      .status(allStatusCode.serverError)
-      .json(
-        new ApiError(
-          allStatusCode.serverError,
-          "An error occurred while updating the category."
-        )
-      );
+      .status(allStatusCode.clientError)
+      .json(new ApiError(allStatusCode.clientError, "Category ID is required."));
   }
+
+  if (!name) {
+    return res
+      .status(allStatusCode.clientError)
+      .json(new ApiError(allStatusCode.clientError, "Category name is required."));
+  }
+
+  const updatedCategory = await Category.findByIdAndUpdate(
+    id,
+    { name },
+    { new: true }
+  );
+
+  if (!updatedCategory) {
+    return res
+      .status(allStatusCode.somethingWrong)
+      .json(new ApiError(allStatusCode.somethingWrong, "Category not found."));
+  }
+
+  return res
+    .status(allStatusCode.success)
+    .json(new APIResponse(allStatusCode.success, updatedCategory, "Category updated successfully."));
 });
 
-export { addCategory, viewAllCategories, deleteCategory, updateCategory };
+export { addCategory, addSubcategory, viewAllCategories, deleteCategory, deleteSubcategory, updateCategory };

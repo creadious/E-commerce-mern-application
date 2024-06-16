@@ -21,6 +21,9 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    sizes: {
+      type: [String], // changed to array of strings for multiple sizes
+    },
     stock: {
       type: Number,
       default: 0,
@@ -29,6 +32,9 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: true,
+    },
+    subcategory: {
+      type: String,
     },
     addedBy: {
       type: String,

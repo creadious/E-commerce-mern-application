@@ -22,13 +22,13 @@ app.use(cookieParser());
 
 // app.post("/check", async (req, res) => {
 //   try {
-//     const { name } = req?.body;
+//     const body = req?.body;
 
-//     console.log({ name });
+//     console.log({ body });
 
-//     if (name == undefined || name == "") {
-//       return res.send("Data not received :(");
-//     }
+//     // if (name == undefined || name == "") {
+//     //   return res.send("Data not received :(");
+//     // }
 
 //     return res.send( "Data received!!!!!!!!!!!!!!!!!!!!!!");
 //   } catch (error) {
@@ -39,12 +39,12 @@ app.use(cookieParser());
 
 // Routes Import
 import userRouter from "./routes/user.routes.js";
-import productRouter from "./routes/product.routes.js";
 import categoryRouter from "./routes/category.routes.js";
+import productsRouter from "./routes/product.routes.js";
 
 // Routes declaration
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/products", productRouter);
-app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/products", productsRouter);
 
 export default app;
