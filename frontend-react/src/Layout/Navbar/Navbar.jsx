@@ -4,16 +4,17 @@ import { FaShoppingCart } from "react-icons/fa";
 import { TbMenuDeep } from "react-icons/tb";
 import useAuth from "../../hook/useAuth";
 import toast from "react-hot-toast";
-
 import LoadingSpin from "../../components/LoadingSpin";
-import useUserInfo from "../../hook/useUserInfo";
 
 const Navbar = () => {
-  const [userInfo] = useUserInfo();
-
   const { user, logOut, loading } = useAuth();
-
   const navigate = useNavigate();
+
+  // Function to get cart items count from localStorage
+  const getCartItemCount = () => {
+    const cartItems = JSON.parse(localStorage.getItem("orderDetails")) || [];
+    return cartItems.length;
+  };
 
   const handleLogout = () => {
     logOut().then(() => {
@@ -58,7 +59,7 @@ const Navbar = () => {
             <Link to="./cart" className="relative md:text-xl" title="Cart">
               <FaShoppingCart />
               <span className="text-xs absolute bg-red-400 w-4 h-4 text-center rounded-full -top-1 -right-2 text-white font-medium">
-                0
+                {getCartItemCount()}
               </span>
             </Link>
           </li>
@@ -75,13 +76,9 @@ const Navbar = () => {
                     </Link>
                   </li>
                   <li>
-                    {userInfo?.role === "admin" ? (
-                      <Link to={`/dashboard/home`}>Dashboard</Link>
-                    ) : (
-                      <Link to="/order" className="nav-link">
-                        Order
-                      </Link>
-                    )}
+                    <Link to="/order" className="nav-link">
+                      Order
+                    </Link>
                   </li>
                   <li>
                     <span onClick={handleLogout} className="nav-link">

@@ -2,9 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { FILE_SIZE_LIMIT } from "./constants.js";
-import multer from "multer";
 
-const upload = multer();
 const app = express();
 
 app.use(
@@ -41,10 +39,12 @@ app.use(cookieParser());
 import userRouter from "./routes/user.routes.js";
 import categoryRouter from "./routes/category.routes.js";
 import productsRouter from "./routes/product.routes.js";
+import addressRouter from "./routes/address.routes.js";
 
 // Routes declaration
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/products", productsRouter);
+app.use("/api/v1/address", addressRouter);
 
 export default app;

@@ -10,6 +10,8 @@ import PrivateRoute from "./PrivateRoute";
 import DashboardHome from "../Pages/DashboardPages/DashboardHome";
 import AddProduct from "../Pages/DashboardPages/AddProduct";
 import ProductDetails from "../Pages/ProductDetails/ProductDetails";
+import PlaceOrder from "../Pages/PlaceOrder/PlaceOrder";
+import Payment from "../Pages/Payment/Payment";
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +39,22 @@ export const router = createBrowserRouter([
           ),
         element: <ProductDetails />,
       },
+      {
+        path: "/place-order",
+        element: (
+          <PrivateRoute>
+            <PlaceOrder />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/payment",
+        element: (
+          <PrivateRoute>
+            <Payment />
+          </PrivateRoute>
+        ),
+      },
     ],
   },
   {
@@ -48,7 +66,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
-        path: "",
+        path: "home",
         element: <DashboardHome />,
       },
       {

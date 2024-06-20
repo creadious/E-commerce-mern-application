@@ -1,9 +1,12 @@
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { AiOutlineMinusCircle, AiOutlinePlusCircle } from "react-icons/ai";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { addToCart } from "../../utils/cartUtils";
 
 const ProductDetails = () => {
+
   const data = useLoaderData();
   const {
     _id,
@@ -33,27 +36,15 @@ const ProductDetails = () => {
 
   const handleOrderNow = () => {
     if (!selectedSize) {
-      alert("Please select a size before ordering.");
+      toast.error("Please select a size before ordering.");
       return;
     }
 
-    const newOrder = {
-      productId: _id,
-      quantity,
-      size: selectedSize,
-    };
-
-    // Retrieve existing orders from localStorage or initialize an empty array
-    const existingOrders =
-      JSON.parse(localStorage.getItem("orderDetails")) || [];
-
-    // Add the new order to the array
-    existingOrders.push(newOrder);
-
-    // Save the updated orders array to localStorage
-    localStorage.setItem("orderDetails", JSON.stringify(existingOrders));
-
-    // Navigate to the order page or show a success message
+    const success = addToCart(_id, quantity, selectedSize);
+    if (success) {
+      // Optional: You can trigger a custom event or use a state management solution to update the navbar cart
+      console.log(success)
+    }
   };
 
   return (
