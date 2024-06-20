@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Font Awesome icons -->
+    <link
+      rel="stylesheet"
+      href="https://site-assets.fontawesome.com/releases/v6.1.1/css/all.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <title>Register - ECOM</title>
+  </head>
+  <body>
+    <section class="grid md:grid-cols-2">
+      <div class="flex flex-col items-center justify-center gap-5 px-5">
+        <h1 class="text-6xl font-extrabold"><a href="/">ECOM</a></h1>
+        <p class="md:w-3/4 text-center">
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ab natus ut
+          culpa asperiores excepturi, laudantium facere ipsum reprehenderit
+          veritatis ea ducimus voluptas. Rem reiciendis animi rerum aspernatur
+          laboriosam vel.
+        </p>
+      </div>
+      <div>
+        <div class="bg-gray-50">
+          <div
+            class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0"
+          >
+            <div
+              class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:border-gray-700"
+            >
+              <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+                <h1
+                  class="text-xl font-bold leading-tight tracking-tight md:text-2xl"
+                >
+                  Create an account
+                </h1>
+                <form id="registrationForm" class="space-y-4 md:space-y-6">
+                  <div class="flex gap-2 justify-between">
+                    <div>
+                      <label
+                        for="firstName"
+                        class="block mb-2 text-sm font-medium"
+                        >First Name</label
+                      >
+                      <input
+                        type="name"
+                        name="firstName"
+                        id="firstName"
+                        class="bg-gray-50 border border-gray-300 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        placeholder="John"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label
+                        for="lastName"
+                        class="block mb-2 text-sm font-medium"
+                        >Last Name</label
+                      >
+                      <input
+                        type="name"
+                        name="lastName"
+                        id="lastName"
+                        class="bg-gray-50 border border-gray-300 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        placeholder="Paul"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label for="email" class="block mb-2 text-sm font-medium"
+                      >Email</label
+                    >
+                    <input
+                      type="email"
+                      name="email"
+                      id="email"
+                      class="bg-gray-50 border border-gray-300 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      placeholder="name@company.com"
+                      required
+                    />
+                  </div>
+                  <div class="">
+                    <label for="gender" class="block mb-2 text-sm font-medium"
+                      >Gender</label
+                    >
+                    <div class="flex gap-4">
+                      <div>
+                        <input
+                          type="radio"
+                          id="male"
+                          name="gender"
+                          value="male"
+                          required
+                        />
+                        <label for="male" class="cursor-pointer">Male</label>
+                      </div>
+                      <div>
+                        <input
+                          type="radio"
+                          id="female"
+                          name="gender"
+                          value="female"
+                          required
+                        />
+                        <label for="female" class="cursor-pointer"
+                          >Female</label
+                        >
+                      </div>
+                      <div>
+                        <input
+                          type="radio"
+                          id="others"
+                          name="gender"
+                          value="others"
+                          required
+                        />
+                        <label for="others" class="cursor-pointer"
+                          >Others</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label for="password" class="block mb-2 text-sm font-medium"
+                      >Password</label
+                    >
+                    <input
+                      type="password"
+                      name="password"
+                      id="password"
+                      placeholder="••••••••"
+                      autocomplete="false"
+                      class="bg-gray-50 border border-gray-300 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      required
+                    />
+                    <p
+                      id="password-error"
+                      class="text-red-600 bg-red-100 py-1 px-2 hidden text-sm mt-1"
+                    ></p>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                      <input
+                        id="terms"
+                        aria-describedby="terms"
+                        type="checkbox"
+                        class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
+                        required
+                      />
+                    </div>
+                    <div class="ml-3 text-sm text-gray-600">
+                      <label for="terms" class="font-light"
+                        >I accept the
+                        <a class="font-medium hover:underline" href="#"
+                          >Terms and Conditions</a
+                        ></label
+                      >
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    class="w-full text-white bg-gray-800 hover:bg-slate-400 hover:text-gray-800 duration-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                  >
+                    Register
+                  </button>
+                  <p class="text-sm font-light text-black">
+                    Already have an account?
+                    <a
+                      href="/login.html"
+                      class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+                      >Login here</a
+                    >
+                  </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="./main.js"></script>
+
+    <script type="module">
+      import { auth } from "./firebase.config.js";
+      import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+      document
+        .getElementById("registrationForm")
+        .addEventListener("submit", (event) => {
+          event.preventDefault();
+
+          const form = event.target;
+          const firstName = form.firstName.value;
+          const lastName = form.lastName.value;
+          const email = form.email.value;
+          const gender = form.gender.value;
+          const password = form.password.value;
+
+          const passwordError = document.getElementById("password-error");
+
+          if (password.length < 6) {
+            passwordError.classList.remove("hidden");
+            passwordError.innerText = `Password must be 6 characters`;
+            return 0;
+          }
+          passwordError.classList.add("hidden");
+
+          const userDetails = { firstName, lastName, email, gender, password };
+
+          fetch("http://localhost:8000/api/v1/users/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userDetails),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              if (data?.success) {
+                userRegister(email, password)
+                  .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("User registered:", user);
+                    alert("Registration successful!");
+                    window.location.href = "/";
+                  })
+                  .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    const emailExist = searchWord(
+                      errorMessage,
+                      "email-already-in-use"
+                    );
+                    if (emailExist) {
+                      return alert("Email already exist.");
+                    }
+                    console.error("Registration error:", errorMessage);
+                    alert("Registration failed. " + errorMessage);
+                  });
+              } else {
+                console.log(data?.message);
+                alert("Registration failed. " + data?.message);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Registration failed. Please try again.");
+            });
+        });
+
+      const radioButtons = document.querySelectorAll('input[type="radio"]');
+      radioButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+          // Uncheck all other radio buttons
+          radioButtons.forEach((btn) => {
+            btn.checked = false;
+          });
+          // Check the clicked radio button
+          this.checked = true;
+        });
+      });
+    </script>
+  </body>
+</html>
