@@ -2,15 +2,15 @@ import mongoose, { Schema } from "mongoose";
 
 // mini model schema
 const orderItemsSchema = new mongoose.Schema({
-    productId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-    },
-    quantity: {
-      type: Number,
-      required: true,
-    },
-  });
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+  },
+  quantity: {
+    type: Number,
+    required: true,
+  },
+});
 
 const orderSchema = new Schema(
   {
@@ -18,20 +18,29 @@ const orderSchema = new Schema(
       type: Number,
       require: true,
     },
-    customer: {
+    customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
     orderItems: {
       type: [orderItemsSchema],
     },
-    address: {
+    addressId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
+      required: true,
+    },
+    paymentId: {
       type: String,
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["CARD", "UPI", "CASH", "OTHERS"],
       required: true,
     },
     status: {
       type: String,
-      enum: ["PENDING", "CANCELLED", "DELIVERED"],
+      enum: ["PENDING", "ACCEPTED", "SHIPPING", "CANCELLED", "DELIVERED"],
       default: "PENDING",
     },
   },

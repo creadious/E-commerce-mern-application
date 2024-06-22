@@ -211,7 +211,7 @@ const productDetails = asyncHandler(async (req, res) => {
         .json(
           new ApiError(
             allStatusCode.clientError,
-            "Please provide a valid product id via query."
+            "Please provide a valid product id  query."
           )
         );
     }

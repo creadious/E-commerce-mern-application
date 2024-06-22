@@ -39,12 +39,16 @@ app.use(cookieParser());
 import userRouter from "./routes/user.routes.js";
 import categoryRouter from "./routes/category.routes.js";
 import productsRouter from "./routes/product.routes.js";
+import cartsRouter from "./routes/cart.routes.js";
 import addressRouter from "./routes/address.routes.js";
+import orderRouter from "./routes/order.routes.js";
 
 // Routes declaration
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/products", productsRouter);
+app.use("/api/v1/carts", cartsRouter);
 app.use("/api/v1/address", addressRouter);
+app.use("/api/v1/orders", orderRouter);
 
 export default app;

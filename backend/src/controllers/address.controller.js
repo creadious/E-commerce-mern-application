@@ -61,7 +61,7 @@ const addAddress = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
-    console.error("Error adding product:", error);
+    console.error("Error adding address:", error);
     return res
       .status(allStatusCode.somethingWrong)
       .json(
@@ -97,7 +97,7 @@ const viewUserAddresses = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
-    console.error("Error adding product:", error);
+    console.error("Error show addresses:", error);
     return res
       .status(allStatusCode.somethingWrong)
       .json(
@@ -209,7 +209,7 @@ const deleteAddress = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
-    console.error("Error updating address:", error);
+    console.error("Error deleting address:", error);
     return res
       .status(allStatusCode.somethingWrong)
       .json(
