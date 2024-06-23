@@ -4,6 +4,7 @@ import { allStatusCode } from "../constants.js";
 import { ApiError } from "../utils/ApiError.js";
 import { APIResponse } from "../utils/ApiResponse.js";
 import { Cart } from "../models/cart.model.js";
+import { check } from "prettier";
 
 const addToCart = asyncHandler(async (req, res) => {
   try {
@@ -234,7 +235,7 @@ const quantityDecrease = asyncHandler(async (req, res) => {
       {
         $inc: { quantity: -1 },
       },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     return res

@@ -36,6 +36,7 @@ const productSchema = new mongoose.Schema(
     subcategoryId: {
       type: String,
     },
+    sales: Number,
     addedBy: {
       type: String,
     },
