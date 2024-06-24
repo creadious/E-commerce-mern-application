@@ -1,15 +1,14 @@
-import useCartProductDetails from "../hook/useCartProductDetails";
-
-const priceDetails = () => {
-  const [cartItems, _, isLoading] = useCartProductDetails();
-
-  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const totalOriginalPrice = cartItems.reduce(
-    (acc, item) => acc + item.actualPrice * item.quantity,
+const priceDetails = (cartItems) => {
+  const totalItems = cartItems?.reduce((acc, item) => acc + item.quantity, 0);
+  const totalOriginalPrice = cartItems?.reduce(
+    (acc, item) => acc + item?.productDetails?.actualPrice * item.quantity,
     0
   );
   const totalDiscount = cartItems.reduce(
-    (acc, item) => acc + (item.actualPrice - item.offerPrice) * item.quantity,
+    (acc, item) =>
+      acc +
+      (item?.productDetails?.actualPrice - item?.productDetails?.offerPrice) *
+        item.quantity,
     0
   );
   const totalAmount = totalOriginalPrice - totalDiscount;

@@ -81,7 +81,7 @@ const addProduct = asyncHandler(async (req, res) => {
     const uploadedProductImage = await uploadOnCloudinary(
       productImageLocalPath
     );
-    console.log(stocks);
+    
     const newProduct = await Product.create({
       name,
       description,

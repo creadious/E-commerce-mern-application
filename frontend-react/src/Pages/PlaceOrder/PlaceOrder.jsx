@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import LoadingSpin from "../../components/LoadingSpin";
 import useCartProductDetails from "../../hook/useCartProductDetails";
 import AddressForm from "./AddressForm";
@@ -7,28 +7,26 @@ import ShowAddresses from "./ShowAddresses";
 
 import { AiFillPlusCircle } from "react-icons/ai";
 import toast from "react-hot-toast";
+import priceDetails from "../../utils/priceDetails";
 
 const PlaceOrder = () => {
-  const [cartItems, _, isLoading] = useCartProductDetails();
+  const location = useLocation();
+  const { state } = location;
+  const cartItems = state?.cartItems;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [paymentMethod, setPaymentMethod] = useState(null);
+
+  const { totalItems, totalOriginalPrice, totalDiscount, totalAmount } =
+    priceDetails(cartItems);
 
   const [isAddressForm, setIsAddressForm] = useState(false);
 
   const [selectedAddress, setSelectedAddress] = useState(null);
-  
+
   const handleSelectAddress = (id) => {
     setSelectedAddress(id);
   };
-
-  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const totalOriginalPrice = cartItems.reduce(
-    (acc, item) => acc + item.actualPrice * item.quantity,
-    0
-  );
-  const totalDiscount = cartItems.reduce(
-    (acc, item) => acc + (item.actualPrice - item.offerPrice) * item.quantity,
-    0
-  );
-  const totalAmount = totalOriginalPrice - totalDiscount;
 
   if (isLoading) {
     return (
@@ -41,7 +39,7 @@ const PlaceOrder = () => {
   return (
     <section className="md:mt-28 mt-16 md:px-0 px-2 min-h-screen xl:w-[1200px] mx-auto pb-8">
       <div className="grid md:grid-cols-3 gap-5">
-        <div className="md:col-span-2">
+        <div className="">
           <ShowAddresses
             handleSelectAddress={handleSelectAddress}
             selectedAddress={selectedAddress}
@@ -58,6 +56,31 @@ const PlaceOrder = () => {
           ) : (
             <AddressForm handleAddressShow={handleAddressShow} />
           )}
+        </div>
+        <div className="">
+          <label
+            htmlFor="paymentMethod"
+            className="text-sm font-medium block pb-2"
+          >
+            Select your payment method :
+          </label>
+          <select
+            name=""
+            id=""
+            className="w-full bg-slate-300 px-2 py-1 outline outline-2 cursor-pointer"
+            onChange={(e) => {
+              if (e.target.value == "CASH") {
+                toast.error("Sorry! cash on delivery not available.");
+              }
+              setPaymentMethod(e.target.value);
+            }}
+          >
+            <option value="no value" selected disabled>
+              Payment method
+            </option>
+            <option value="CASH">CASH</option>
+            <option value="CARD">CARD</option>
+          </select>
         </div>
         <div className="col-span-1">
           <div className="p-5 bg-slate-200">
@@ -83,10 +106,10 @@ const PlaceOrder = () => {
             <h2 className="mt-5 pt-5 border-t border-black flex justify-between text-xl text-slate-700 font-bold">
               Total Amount: <span id="net-amount">₹{totalAmount}</span>
             </h2>
-            {selectedAddress ? (
+            {selectedAddress && paymentMethod === "CARD" ? (
               <Link
                 to="/payment"
-                state={{ cartItems, selectedAddress }}
+                state={{ cartItems, selectedAddress, paymentMethod }}
                 className="mt-5 block p-2 text-center bg-red-300 font-medium hover:bg-red-500 duration-200 w-full"
               >
                 Payment

@@ -12,9 +12,9 @@ import {
 const router = Router();
 
 router.route("/add-to-cart").post(verifyJwt, addToCart);
-router.route("/cart-show").get(verifyJwt, userCartShow);
+router.route("/view").get(verifyJwt,userCartShow);
 router.route("/quantity-plus").patch(verifyJwt, quantityIncrease);
 router.route("/quantity-minus").patch(verifyJwt, quantityDecrease);
-router.route("/cart-delete").delete(verifyJwt, deleteProductInCart);
+router.route("/cart-delete").patch(verifyJwt, deleteProductInCart);
 
 export default router;

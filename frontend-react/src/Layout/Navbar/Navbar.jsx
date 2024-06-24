@@ -5,20 +5,17 @@ import { TbMenuDeep } from "react-icons/tb";
 import useAuth from "../../hook/useAuth";
 import toast from "react-hot-toast";
 import LoadingSpin from "../../components/LoadingSpin";
+import useCartItems from "../../hook/useCartItems";
+import { useState } from "react";
 
 const Navbar = () => {
   const { user, logOut, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Function to get cart items count from localStorage
-  const getCartItemCount = () => {
-    const cartItems = JSON.parse(localStorage.getItem("orderDetails")) || [];
-    return cartItems.length;
-  };
-
   const handleLogout = () => {
     logOut().then(() => {
       toast.success("Logout successful");
+      localStorage.removeItem("access-token")
       navigate("/");
     });
   };
@@ -56,12 +53,16 @@ const Navbar = () => {
             </Link>
           </li>
           <li>
-            <Link to="./cart" className="relative md:text-xl" title="Cart">
-              <FaShoppingCart />
-              <span className="text-xs absolute bg-red-400 w-4 h-4 text-center rounded-full -top-1 -right-2 text-white font-medium">
-                {getCartItemCount()}
-              </span>
-            </Link>
+            {user ? (
+              <CartBody />
+            ) : (
+              <Link to="./cart" className="relative md:text-xl" title="Cart">
+                <FaShoppingCart />
+                <span className="text-xs absolute bg-red-400 w-4 h-4 text-center rounded-full -top-1 -right-2 text-white font-medium">
+                  0
+                </span>
+              </Link>
+            )}
           </li>
           <li className="relative user-icon cursor-pointer">
             {loading ? (
@@ -76,7 +77,7 @@ const Navbar = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link to="/order" className="nav-link">
+                    <Link to="/orders" className="nav-link">
                       Order
                     </Link>
                   </li>
@@ -99,6 +100,19 @@ const Navbar = () => {
         </ul>
       </div>
     </header>
+  );
+};
+
+const CartBody = () => {
+  const [cartItems] = useCartItems();
+console.log(cartItems)
+  return (
+    <Link to="./cart" className="relative md:text-xl" title="Cart">
+      <FaShoppingCart />
+      <span className="text-xs absolute bg-red-400 w-4 h-4 text-center rounded-full -top-1 -right-2 text-white font-medium">
+        {cartItems?.length}
+      </span>
+    </Link>
   );
 };
 

@@ -5,117 +5,66 @@ import {
   AiOutlinePlusCircle,
 } from "react-icons/ai";
 import LoadingSpin from "../../components/LoadingSpin";
-import useCartProductDetails from "../../hook/useCartProductDetails";
+import useCartItems from "../../hook/useCartItems";
+import priceDetails from "../../utils/priceDetails";
+import useAxiosSecure from "../../hook/useAxiosSecure";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 const Cart = () => {
-  const [cartItems, setCartItems, isLoading] = useCartProductDetails();
+  const [axiosSecure] = useAxiosSecure();
 
-  // const [cartItems, setCartItems] = useState([]);
-  // const [isLoading, setIsLoading] = useState(true);
+  const [cartItems, loading, cartRefetch] = useCartItems();
 
-  // useEffect(() => {
-  //   const fetchCartItems = async () => {
-  //     const orderDetails =
-  //       JSON.parse(localStorage.getItem("orderDetails")) || [];
-  //     if (orderDetails.length === 0) {
-  //       setIsLoading(false);
-  //       return;
-  //     }
+  const [isLoading, setIsLoading] = useState(false);
 
-  //     try {
-  //       const responses = await Promise.all(
-  //         orderDetails.map((order) =>
-  //           axiosSecure
-  //             .get(`/products/product-details?id=${order.productId}`)
-  //             .then((res) => {
-  //               return {
-  //                 ...res.data?.data,
-  //                 quantity: order.quantity,
-  //                 size: order.size,
-  //               };
-  //             })
-  //         )
-  //       );
-  //       setCartItems(responses);
-  //     } catch (error) {
-  //       console.error("Error fetching cart items:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
+  const { totalItems, totalOriginalPrice, totalDiscount, totalAmount } =
+    priceDetails(cartItems);
 
-  //   fetchCartItems();
-  // }, []);
-
-  const handleQuantityIncrement = (index) => {
-    const updatedCartItems = [...cartItems];
-    updatedCartItems[index].quantity += 1;
-    setCartItems(updatedCartItems);
-    localStorage.setItem(
-      "orderDetails",
-      JSON.stringify(
-        updatedCartItems.map((item) => ({
-          productId: item._id,
-          quantity: item.quantity,
-          size: item.size,
-        }))
-      )
-    );
-  };
-
-  const handleQuantityDecrement = (index) => {
-    const updatedCartItems = [...cartItems];
-    if (updatedCartItems[index].quantity > 1) {
-      updatedCartItems[index].quantity -= 1;
-      setCartItems(updatedCartItems);
-      localStorage.setItem(
-        "orderDetails",
-        JSON.stringify(
-          updatedCartItems.map((item) => ({
-            productId: item._id,
-            quantity: item.quantity,
-            size: item.size,
-          }))
-        )
-      );
+  const cartUpdateFunction = async (routeName, id) => {
+    try {
+      setIsLoading(true);
+      const res = await axiosSecure.patch(`/carts/${routeName}`, {
+        cartId: id,
+      });
+      const data = res?.data;
+      if (data?.success) {
+        cartRefetch();
+        if (data?.message == "Product delete from cart successfully.") {
+          return toast.success(data?.message);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      if (error?.response?.data?.message) {
+        return toast.error(error?.response?.data?.message);
+      }
+      toast.error("Something is wrong try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRemoveItem = (index) => {
-    const updatedCartItems = [...cartItems];
-    updatedCartItems.splice(index, 1);
-    setCartItems(updatedCartItems);
-    localStorage.setItem(
-      "orderDetails",
-      JSON.stringify(
-        updatedCartItems.map((item) => ({
-          productId: item._id,
-          quantity: item.quantity,
-          size: item.size,
-        }))
-      )
-    );
+  const handleQuantityIncrement = async (id) => {
+    await cartUpdateFunction("quantity-plus", id);
   };
 
-  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const totalOriginalPrice = cartItems.reduce(
-    (acc, item) => acc + item.actualPrice * item.quantity,
-    0
-  );
-  const totalDiscount = cartItems.reduce(
-    (acc, item) => acc + (item.actualPrice - item.offerPrice) * item.quantity,
-    0
-  );
-  const totalAmount = totalOriginalPrice - totalDiscount;
+  const handleQuantityDecrement = async (id) => {
+    await cartUpdateFunction("quantity-minus", id);
+  };
 
-  if (isLoading) {
+  const handleRemoveItem = async (id) => {
+    await cartUpdateFunction("cart-delete", id);
+  };
+
+  if (loading) {
     return (
       <div className="h-screen grid place-content-center">
         <LoadingSpin />
       </div>
     );
   }
-  // console.log(cartItems);
+
   return (
     <main className="md:mt-28 mt-16 md:px-0 px-2 min-h-screen xl:w-[1200px] mx-auto pb-8">
       <div className="mb-4 flex items-center">
@@ -128,73 +77,95 @@ const Cart = () => {
       </div>
       <section className="grid md:grid-cols-3 grid-cols-1 gap-5">
         <div className="md:col-span-2 space-y-3">
-          {cartItems.map((item, index) => (
-            <div key={index} className="flex justify-between gap-5 items-start">
-              <div className="flex gap-2">
-                <img
-                  src={item.productImage}
-                  alt={item.name}
-                  className="h-20 w-20 object-cover object-top p-1 bg-white rounded-md"
-                />
-                <div>
-                  <Link
-                    to={`/item-details/${item?._id}`}
-                    className="md:text-xl font-bold hover:underline hover:text-blue-800"
-                  >
-                    {item?.name.length > 45
-                      ? item?.name?.slice(0, 45) + "..."
-                      : item?.name}
-                  </Link>
-                  <div className="flex gap-2 text-lg items-center">
-                    <p className="line-through text-sm">₹{item.actualPrice}</p>
-                    <p className="font-medium">₹{item.offerPrice}</p>
-                    <p className="text-xs font-medium text-green-700">
-                      {Math.round(
-                        ((item.actualPrice - item.offerPrice) /
-                          item.actualPrice) *
-                          100
-                      )}
-                      % off
+          {cartItems.map((item) => {
+            return (
+              <div
+                key={item?._id}
+                className="flex justify-between gap-5 items-start"
+              >
+                <div className="flex gap-2">
+                  <img
+                    src={item?.productDetails?.productImage}
+                    alt={item?.productDetails?.name}
+                    className="h-20 w-20 object-cover object-top p-1 bg-white rounded-md"
+                  />
+                  <div>
+                    <Link
+                      to={`/item-details/${item?.productId}`}
+                      className="md:text-xl font-bold hover:underline hover:text-blue-800"
+                    >
+                      {item?.productDetails?.name?.length > 45
+                        ? item?.productDetails?.name?.slice(0, 45) + "..."
+                        : item?.productDetails?.name}
+                    </Link>
+                    <div className="flex gap-2 text-lg items-center">
+                      <p className="line-through text-sm">
+                        ₹{item?.productDetails?.actualPrice}
+                      </p>
+                      <p className="font-medium">
+                        ₹{item?.productDetails?.offerPrice}
+                      </p>
+                      <p className="text-xs font-medium text-green-700">
+                        {Math.round(
+                          ((item?.productDetails?.actualPrice -
+                            item?.productDetails?.offerPrice) /
+                            item?.productDetails?.actualPrice) *
+                            100
+                        )}
+                        % off
+                      </p>
+                    </div>
+                    <p>
+                      <span className="text-sm p-1 py-0 rounded-sm bg-slate-300">
+                        {item?.size}
+                      </span>
                     </p>
                   </div>
-                  <p>
-                    <span className="text-sm p-1 py-0 rounded-sm bg-slate-300">
-                      {item?.size}
-                    </span>
-                  </p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex gap-5 text-xl">
+                    <div className="flex items-center gap-1">
+                      <button
+                        disabled={isLoading}
+                        onClick={() => handleQuantityDecrement(item?._id)}
+                      >
+                        <AiOutlineMinusCircle />
+                      </button>
+                      {isLoading ? (
+                        <LoadingSpin />
+                      ) : (
+                        <input
+                          type="number"
+                          className="w-6 text-center font-medium"
+                          minLength="1"
+                          value={item?.quantity}
+                          readOnly
+                        />
+                      )}
+                      <button
+                        disabled={isLoading}
+                        onClick={() => handleQuantityIncrement(item?._id)}
+                      >
+                        <AiOutlinePlusCircle />
+                      </button>
+                    </div>
+                    <div className="h-full text-xl font-medium">
+                      <h3>
+                        ₹{item?.productDetails?.offerPrice * item?.quantity}
+                      </h3>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveItem(item?._id)}
+                    className="block text-red-600 hover:scale-110 duration-150 ms-auto text-xl"
+                    title="delete"
+                  >
+                    <AiFillDelete />
+                  </button>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex gap-5 text-xl">
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => handleQuantityDecrement(index)}>
-                      <AiOutlineMinusCircle />
-                    </button>
-                    <input
-                      type="number"
-                      className="w-6 text-center font-medium"
-                      minLength="1"
-                      value={item.quantity}
-                      readOnly
-                    />
-                    <button onClick={() => handleQuantityIncrement(index)}>
-                      <AiOutlinePlusCircle />
-                    </button>
-                  </div>
-                  <div className="h-full text-xl font-medium">
-                    <h3>₹{item.offerPrice * item.quantity}</h3>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleRemoveItem(index)}
-                  className="block text-red-600 hover:scale-110 duration-150 ms-auto text-xl"
-                  title="delete"
-                >
-                  <AiFillDelete />
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div>
           <div className="p-5 bg-slate-200">
@@ -222,6 +193,7 @@ const Cart = () => {
             </h2>
             <Link
               to="/place-order"
+              state={{ cartItems }}
               className="mt-5 block p-2 text-center bg-red-300 font-medium hover:bg-red-500 duration-200"
             >
               Place order

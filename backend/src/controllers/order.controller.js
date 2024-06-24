@@ -14,16 +14,16 @@ import { Product } from "../models/product.models.js";
 const stripeKey = stripe(process.env.PAYMENT_SECRET_KEY);
 
 const createPaymentIntent = asyncHandler(async (req, res) => {
-  // const { items } = req.body;
+  const { items } = req.body;
 
-  const items = [
-    {
-      _id: "667720de4b54b4eea8e28f31",
-    },
-    {
-      _id: "6676e0353185d26ef066f6f3",
-    },
-  ];
+  // const items = [
+  //   {
+  //     _id: "667720de4b54b4eea8e28f31",
+  //   },
+  //   {
+  //     _id: "6676e0353185d26ef066f6f3",
+  //   },
+  // ];
 
   try {
     if (!Array.isArray(items) || items.length === 0) {
@@ -127,25 +127,24 @@ const createPaymentIntent = asyncHandler(async (req, res) => {
 
 const paymentComplete = asyncHandler(async (req, res) => {
   try {
-    // const {items, paymentTransaction, addressId, paymentMethod} = req.body;
+    const { items, paymentTransaction, addressId, paymentMethod } = req.body;
 
-    const paymentTransaction =
-      "pi_3PUnThSHFnB0nQaY1oNdNLmq_secret_pGruPgZTFBPB0w2uIy1tuyZHq";
+    // const paymentTransaction =
+    //   "pi_3PUnThSHFnB0nQaY1oNdNLmq_secret_pGruPgZTFBPB0w2uIy1tuyZHq";
 
+    // const items = [
+    //   {
+    //     _id: "667720de4b54b4eea8e28f31",
+    //   },
+    //   {
+    //     _id: "66783848ee30cba1c19179fd",
+    //   },
+    // ];
+
+    // const addressId = "6674499371c06d5bd48cb459";
+
+    // const paymentMethod = "CARD";
     const userId = req.user._id;
-
-    const items = [
-      {
-        _id: "667720de4b54b4eea8e28f31",
-      },
-      {
-        _id: "66783848ee30cba1c19179fd",
-      },
-    ];
-
-    const addressId = "6674499371c06d5bd48cb459";
-
-    const paymentMethod = "CARD";
 
     if (!Array.isArray(items) || items.length === 0 || !paymentTransaction) {
       return res
@@ -240,6 +239,7 @@ const paymentComplete = asyncHandler(async (req, res) => {
         productId: v.productId,
         productPrice: v.productDetails.offerPrice,
         quantity: v.quantity,
+        size: v.size,
       };
     });
 
@@ -326,15 +326,37 @@ const viewOrderHistory = asyncHandler(async (req, res) => {
             $push: {
               productId: "$orderItems.productId",
               quantity: "$orderItems.quantity",
+              size: "$orderItems.size",
               productPrice: "$orderItems.productPrice",
               productDetails: "$productDetails",
             },
           },
         },
       },
+      {
+        $lookup: {
+          from: "addresses",
+          localField: "addressId",
+          foreignField: "_id",
+          as: "addressDetails",
+        },
+      },
+      {
+        $addFields: {
+          addressDetails: { $arrayElemAt: ["$addressDetails", 0] },
+        },
+      },
     ]);
 
-    res.json(orderHistory);
+    return res
+      .status(allStatusCode.success)
+      .json(
+        new APIResponse(
+          allStatusCode.success,
+          orderHistory,
+          "Order history fetch successfully."
+        )
+      );
   } catch (error) {
     console.error("Error fetching order history:", error);
     return res

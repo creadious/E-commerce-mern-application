@@ -6,5 +6,5 @@ export const allStatusCode = {
   userExist:409,
   somethingWrong:500,
   unauthorized:401,
-  notFound:410
+  notFound:405
 };

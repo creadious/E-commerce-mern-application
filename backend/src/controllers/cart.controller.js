@@ -8,14 +8,10 @@ import { check } from "prettier";
 
 const addToCart = asyncHandler(async (req, res) => {
   try {
-    const { productId, quantity } = req?.body;
+    const { productId, quantity, size } = req?.body;
     const userId = req?.user?._id;
 
-    if (
-      [productId, quantity].some(
-        (field) => field === undefined || field.trim() === ""
-      )
-    ) {
+    if (!productId || !quantity || !size) {
       return res
         .status(allStatusCode.clientError)
         .json(
@@ -29,6 +25,7 @@ const addToCart = asyncHandler(async (req, res) => {
     const cartCheck = await Cart.findOne({
       productId: new ObjectId(productId),
       userId: new ObjectId(userId),
+      size: size.toUpperCase(),
     });
 
     if (cartCheck) {
@@ -43,6 +40,7 @@ const addToCart = asyncHandler(async (req, res) => {
       userId,
       productId,
       quantity: parseInt(quantity),
+      size: size.toUpperCase(),
     });
 
     return res
@@ -82,19 +80,20 @@ const userCartShow = asyncHandler(async (req, res) => {
         $project: {
           productId: 1,
           quantity: 1,
+          size: 1,
           //   userId: 0,
           productDetails: { $arrayElemAt: ["$productDetails", 0] },
         },
       },
     ]);
 
-    if (cartProducts.length === 0) {
-      return res
-        .status(allStatusCode.notFound)
-        .json(
-          new ApiError(allStatusCode.notFound, "No product found in your cart.")
-        );
-    }
+    // if (!cartProducts.length) {
+    //   return res
+    //     .status(allStatusCode.notFound)
+    //     .json(
+    //       new ApiError(allStatusCode.notFound, "No product found in your cart.")
+    //     );
+    // }
 
     return res
       .status(allStatusCode.success)
@@ -156,7 +155,7 @@ const quantityIncrease = asyncHandler(async (req, res) => {
         .json(
           new ApiError(
             allStatusCode.clientError,
-            "quantity not increase than stock"
+            "Quantity not increase than stock"
           )
         );
     }

@@ -4,9 +4,12 @@ import { AiOutlineMinusCircle, AiOutlinePlusCircle } from "react-icons/ai";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { addToCart } from "../../utils/cartUtils";
+import useAxiosSecure from "../../hook/useAxiosSecure";
+import Swal from "sweetalert2";
+import useCartItems from "../../hook/useCartItems";
+import useAuth from "../../hook/useAuth";
 
 const ProductDetails = () => {
-
   const data = useLoaderData();
   const {
     _id,
@@ -19,6 +22,7 @@ const ProductDetails = () => {
     productImage,
   } = data?.data;
 
+  const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(null);
 
@@ -34,18 +38,66 @@ const ProductDetails = () => {
     setSelectedSize(size);
   };
 
-  const handleOrderNow = () => {
-    if (!selectedSize) {
-      toast.error("Please select a size before ordering.");
-      return;
-    }
+  // const handleOrderNow = async () => {
+  //   if (!selectedSize) {
+  //     toast.error("Please select a size before ordering.");
+  //     return;
+  //   }
 
-    const success = addToCart(_id, quantity, selectedSize);
-    if (success) {
-      // Optional: You can trigger a custom event or use a state management solution to update the navbar cart
-      console.log(success)
-    }
-  };
+  //   try {
+  //     const res = await axiosSecure.post("/carts/add-to-cart", {
+  //       productId: _id,
+  //       quantity,
+  //       size: selectedSize,
+  //     });
+
+  //     const data = res.data;
+
+  //     if (data?.success) {
+  //       setQuantity(1);
+  //       cartRefetch();
+  //       Swal.fire({
+  //         title: "Item added!",
+  //         text: "Product added to the cart successfully.",
+  //         icon: "success",
+  //         showCancelButton: true,
+  //         confirmButtonColor: "#3085d6",
+  //         cancelButtonColor: "#d33",
+  //         confirmButtonText: "View Cart",
+  //       }).then((result) => {
+  //         if (result.isConfirmed) {
+  //           window.location.href = "/cart"; // Navigate to cart
+  //         }
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.log("order now error:", error);
+  //     if (error?.response?.data?.message == "Product already in cart") {
+  //       Swal.fire({
+  //         title: "Item already added!",
+  //         text: "This product with the selected size is already added to the cart",
+  //         icon: "warning",
+  //         showCancelButton: true,
+  //         confirmButtonColor: "#3085d6",
+  //         cancelButtonColor: "#d33",
+  //         confirmButtonText: "View Cart",
+  //       }).then((result) => {
+  //         if (result.isConfirmed) {
+  //           window.location.href = "/cart"; // Navigate to cart
+  //         }
+  //       });
+
+  //       return false;
+  //     }
+
+  //     toast.error("Somethings is wrong while ordering.");
+  //   }
+
+  //   // const success = addToCart(_id, quantity, selectedSize);
+  //   // if (success) {
+  //   //   console.log(success)
+  //   // }
+  // };
 
   return (
     <div className="xl:w-[1200px] md:mt-28 pb-10 mt-16 mx-auto">
@@ -122,16 +174,103 @@ const ProductDetails = () => {
             </div>
           </div>
           <div className="pt-5">
-            <button
-              onClick={handleOrderNow}
-              className="bg-yellow-300 font-medium px-5 py-2 text-xl hover:bg-yellow-500 duration-200"
-            >
-              Order Now
-            </button>
+            {user ? (
+              <PlaceOrderButton
+                _id={_id}
+                quantity={quantity}
+                selectedSize={selectedSize}
+                setQuantity={setQuantity}
+              />
+            ) : (
+              <button
+                onClick={() => {
+                  toast.error("Please login first!");
+                }}
+                className="bg-yellow-300 font-medium px-5 py-2 text-xl hover:bg-yellow-500 duration-200"
+              >
+                Order Now
+              </button>
+            )}
           </div>
         </div>
       </div>
     </div>
+  );
+};
+
+const PlaceOrderButton = ({ _id, quantity, selectedSize, setQuantity }) => {
+  const [_1, _2, cartRefetch] = useCartItems();
+
+  const [axiosSecure] = useAxiosSecure();
+
+  const handleOrderNow = async () => {
+    if (!selectedSize) {
+      toast.error("Please select a size before ordering.");
+      return;
+    }
+
+    try {
+      const res = await axiosSecure.post("/carts/add-to-cart", {
+        productId: _id,
+        quantity,
+        size: selectedSize,
+      });
+
+      const data = res.data;
+
+      if (data?.success) {
+        setQuantity(1);
+        cartRefetch();
+        Swal.fire({
+          title: "Item added!",
+          text: "Product added to the cart successfully.",
+          icon: "success",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "View Cart",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/cart"; // Navigate to cart
+          }
+        });
+      }
+    } catch (error) {
+      console.log("order now error:", error);
+      if (error?.response?.data?.message == "Product already in cart") {
+        Swal.fire({
+          title: "Item already added!",
+          text: "This product with the selected size is already added to the cart",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "View Cart",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/cart"; // Navigate to cart
+          }
+        });
+
+        return false;
+      }
+
+      toast.error("Somethings is wrong while ordering.");
+    }
+
+    // const success = addToCart(_id, quantity, selectedSize);
+    // if (success) {
+    //   console.log(success)
+    // }
+  };
+
+  return (
+    <button
+      onClick={handleOrderNow}
+      className="bg-yellow-300 font-medium px-5 py-2 text-xl hover:bg-yellow-500 duration-200"
+    >
+      Order Now
+    </button>
   );
 };
 
