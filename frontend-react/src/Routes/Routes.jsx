@@ -13,6 +13,7 @@ import ProductDetails from "../Pages/ProductDetails/ProductDetails";
 import PlaceOrder from "../Pages/PlaceOrder/PlaceOrder";
 import Payment from "../Pages/Payment/Payment";
 import Order from "../Pages/Order/Order";
+import OrderDetails from "../Pages/Order/OrderDetails";
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +66,14 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <Order />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/order-details",
+        element: (
+          <PrivateRoute>
+            <OrderDetails />
           </PrivateRoute>
         ),
       },

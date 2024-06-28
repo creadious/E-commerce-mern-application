@@ -95,7 +95,6 @@ const addProduct = asyncHandler(async (req, res) => {
       addedBy: req.user._id, // Assuming you have user information in the request
     });
 
-    console.log("Product added successfully");
 
     return res
       .status(allStatusCode.success)

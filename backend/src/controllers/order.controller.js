@@ -346,6 +346,11 @@ const viewOrderHistory = asyncHandler(async (req, res) => {
           addressDetails: { $arrayElemAt: ["$addressDetails", 0] },
         },
       },
+      {
+        $sort: {
+          createdAt: -1, // Sort by createdAt field in descending order
+        },
+      },
     ]);
 
     return res
