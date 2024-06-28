@@ -59,7 +59,7 @@ const Order = () => {
                         <img
                           src={v?.productDetails?.productImage}
                           alt="Product image"
-                          className="w-12 h-12 h-full object-cover bg-slate-200 p-1 rounded-sm"
+                          className="w-12 h-12  object-cover bg-slate-200 p-1 rounded-sm"
                         />
                         <div className="flex flex-col justify-between">
                           <Link
@@ -73,7 +73,7 @@ const Order = () => {
                           <div className="text-sm flex gap-5">
                             <p>Quantity: {v?.quantity}</p>
                             <p>Size: {v?.size}</p>
-                            <p>Product Price: {v?.productPrice}</p>
+                            <p>Product Price: ₹{v?.productPrice}</p>
                           </div>
                         </div>
                       </div>
@@ -85,7 +85,7 @@ const Order = () => {
                 <div className="flex gap-5">
                   <div>
                     <h2 className="text-xs">Amount</h2>
-                    <h4 className="text-xl font-medium">{itemsPrice}</h4>
+                    <h4 className="text-xl font-medium">₹{itemsPrice}</h4>
                   </div>
                   <div className="text-xs">
                     <p>Status</p>
@@ -103,7 +103,13 @@ const Order = () => {
                   </div>
                 </div>
                 <div className="text-xs flex ">
-                  <Link to={`/order-details`} state={value} className="px-3 py-1 border border-black rounded hover:bg-red-400">View Order</Link>
+                  <Link
+                    to={`/order-details`}
+                    state={value}
+                    className="px-3 py-1 border border-black rounded hover:bg-red-400"
+                  >
+                    View Order
+                  </Link>
                 </div>
               </div>
             </li>

@@ -1,11 +1,16 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const OrderDetails = () => {
   const location = useLocation();
   const { state } = location;
 
-  const { addressDetails, orderItems } = state;
+  const { addressDetails, orderItems, paymentId } = state;
+
+  const itemsPrice = orderItems?.reduce(
+    (acc, item) => acc + item?.productPrice * item?.quantity,
+    0
+  );
 
   console.log(state);
   return (
@@ -15,16 +20,50 @@ const OrderDetails = () => {
         <div className="grid md:grid-cols-3 gap-10">
           <div className="md:col-span-2">
             <h4 className="font-medium text-xl">Order Items Details</h4>
-            <div className="mt-4">
+            <div className="mt-4 space-y-4">
               {orderItems?.map((value) => {
-                const { _id, productDetails } = value;
+                const { _id, productDetails, quantity, size, productPrice } =
+                  value;
                 return (
-                  <div key={_id}>
-                    <img src={productDetails?.productImage} alt="Product Image" className="w-20 h-20 object-cover rounded-md" />
-                    <h3>{productDetails?.name}</h3>
+                  <div key={_id} className="p-4 bg-slate-100 rounded">
+                    <div className="flex gap-4 justify-between">
+                      <div className="flex gap-3">
+                        <img
+                          src={productDetails?.productImage}
+                          alt="Product Image"
+                          className="w-20 h-20 object-cover rounded-md"
+                        />
+                        <div className="flex flex-col gap-2">
+                          <h3 className="text-lg font-medium">
+                            {productDetails?.name}
+                          </h3>
+                          <ul className="text-sm flex gap-5">
+                            <li>Quantity: {quantity}</li>
+                            <li>Size: {size || "(NA)"}</li>
+                            <li>Price: ₹{productPrice}</li>
+                            <li>Total: ₹{productPrice * quantity}</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <Link to={`/item-details/${productDetails?._id}`} className="px-2 py-1 text-sm border border-black rounded hover:bg-red-400 text-nowrap">
+                          See Product
+                        </Link>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
+            </div>
+            <div className="mt-3 bg-slate-200 p-4 space-y-2">
+              <div className="">
+                <h2>Total Amount:</h2>
+                <h2 className="text-4xl font-medium">₹{itemsPrice}</h2>
+              </div>
+              <div>
+                <p>Transaction Id:</p>
+                <p className="mt-1 text-sm p-1 px-3 border border-black inline-block rounded-md">{paymentId}</p>
+              </div>
             </div>
           </div>
           <div className="md:col-span-1 bg-slate-200 p-4 rounded">
